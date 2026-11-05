@@ -1,6 +1,6 @@
-import data.manuscripts.fields as flds
+import data.manus.fields as flds
 
-# states:
+# States
 AUTHOR_REV = 'AUR'
 COPY_EDIT = 'CED'
 IN_REF_REV = 'REV'
@@ -18,7 +18,6 @@ VALID_STATES = [
     WITHDRAWN,
 ]
 
-
 SAMPLE_MANU = {
     flds.TITLE: 'Short module import names in Python',
     flds.AUTHOR: 'Eugene Callahan',
@@ -34,14 +33,13 @@ def is_valid_state(state: str) -> bool:
     return state in VALID_STATES
 
 
-# actions:
+# Actions
 ACCEPT = 'ACC'
 ASSIGN_REF = 'ARF'
 DELETE_REF = 'DRF'
 DONE = 'DON'
 REJECT = 'REJ'
 WITHDRAW = 'WIT'
-# for testing:
 TEST_ACTION = ACCEPT
 
 VALID_ACTIONS = [
@@ -63,18 +61,16 @@ def is_valid_action(action: str) -> bool:
 
 
 def assign_ref(manu: dict, ref: str, extra=None) -> str:
-    print(extra)
-    manu[flds.REFEREES].append(ref)
+    if ref not in manu[flds.REFEREES]:
+        manu[flds.REFEREES].append(ref)
     return IN_REF_REV
 
 
 def delete_ref(manu: dict, ref: str) -> str:
-    if len(manu[flds.REFEREES]) > 0:
-        manu[flds.REFEREES].remove(ref)
-    if len(manu[flds.REFEREES]) > 0:
-        return IN_REF_REV
-    else:
-        return SUBMITTED
+    referees = manu[flds.REFEREES]
+    if ref in referees:
+        referees.remove(ref)
+    return IN_REF_REV if referees else SUBMITTED
 
 
 FUNC = 'f'
@@ -137,14 +133,19 @@ def handle_action(curr_state, action, **kwargs) -> str:
 
 
 def main():
-    print(handle_action(SUBMITTED, ASSIGN_REF,
-                        manu=SAMPLE_MANU, ref='Jack'))
-    print(handle_action(IN_REF_REV, ASSIGN_REF, manu=SAMPLE_MANU,
-                        ref='Jill', extra='Extra!'))
-    print(handle_action(IN_REF_REV, DELETE_REF, manu=SAMPLE_MANU,
-                        ref='Jill'))
-    print(handle_action(IN_REF_REV, DELETE_REF, manu=SAMPLE_MANU,
-                        ref='Jack'))
+    print(handle_action(
+        SUBMITTED, ASSIGN_REF, manu=SAMPLE_MANU, ref='Jack',
+    ))
+    print(handle_action(
+        IN_REF_REV, ASSIGN_REF,
+        manu=SAMPLE_MANU, ref='Jill', extra='Extra!',
+    ))
+    print(handle_action(
+        IN_REF_REV, DELETE_REF, manu=SAMPLE_MANU, ref='Jill',
+    ))
+    print(handle_action(
+        IN_REF_REV, DELETE_REF, manu=SAMPLE_MANU, ref='Jack',
+    ))
     print(handle_action(SUBMITTED, WITHDRAW, manu=SAMPLE_MANU))
     print(handle_action(SUBMITTED, REJECT, manu=SAMPLE_MANU))
 
